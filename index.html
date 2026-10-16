@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f5f5ef" />
+    <meta
+      name="description"
+      content="再吃一口。一个轻松、免费的贪吃蛇小游戏，支持键盘和手机触控。"
+    />
+    <title>小蛇俱乐部 · 再吃一口</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23243e2d'/%3E%3Cpath d='M18 43h21V32H24V21h22' fill='none' stroke='%23c2e77a' stroke-width='10' stroke-linejoin='round'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="game-core.js" defer></script>
+    <script src="game.js" defer></script>
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="site-header">
+        <a class="brand" href="./" aria-label="小蛇俱乐部首页">
+          <svg class="brand-icon" viewBox="0 0 40 40" aria-hidden="true">
+            <rect width="40" height="40" rx="12" fill="currentColor" />
+            <path
+              d="M11 28h15v-8H15v-8h14"
+              fill="none"
+              stroke="#c4e58c"
+              stroke-width="6"
+              stroke-linejoin="round"
+            />
+            <circle cx="28" cy="10.5" r="1" fill="#243e2d" />
+          </svg>
+          <span
+            >小蛇俱乐部<span class="brand-subtitle"
+              >THE LITTLE SNAKE CLUB</span
+            ></span
+          >
+        </a>
+        <span class="header-note"
+          ><span class="status-dot"></span>给大脑放个小假</span
+        >
+      </header>
+
+      <main>
+        <section class="intro" aria-labelledby="page-title">
+          <div>
+            <p class="eyebrow">JUST ONE MORE BITE</p>
+            <h1 id="page-title">
+              再吃一口<span class="title-period">。</span>
+            </h1>
+            <p class="intro-copy">一小格，一小格，把快乐吃长。</p>
+          </div>
+          <div class="intro-stamp" aria-hidden="true">
+            <span>吃 饱 了</span
+            ><svg viewBox="0 0 64 40">
+              <path
+                d="M6 30h32V10h20"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="11"
+                stroke-linejoin="round"
+              />
+              <circle cx="54" cy="7" r="2" fill="#f5f5ef" />
+              <circle cx="54" cy="13" r="2" fill="#f5f5ef" /></svg
+            ><span>才 有 力 气</span>
+          </div>
+        </section>
+
+        <div class="game-layout">
+          <section class="board-card" aria-label="贪吃蛇游戏">
+            <div class="board-toolbar">
+              <div class="board-label">
+                <span class="status-dot" id="game-status-dot"></span
+                ><span id="game-status">准备就绪</span>
+              </div>
+              <span class="board-size">24 × 24 · 经典棋盘</span
+              ><span class="mobile-score"
+                >得分 <strong id="mobile-score">00</strong></span
+              >
+            </div>
+            <div class="board-wrap" id="board-wrap">
+              <canvas
+                id="game-board"
+                width="600"
+                height="600"
+                tabindex="0"
+                aria-label="贪吃蛇棋盘。使用方向键或 W A S D 移动，空格暂停。"
+                >你的浏览器需要支持 Canvas 才能玩这个游戏。</canvas
+              >
+              <div class="game-overlay" id="game-overlay">
+                <div class="overlay-card">
+                  <span class="overlay-eyebrow" id="overlay-eyebrow"
+                    >今日份的小快乐</span
+                  >
+                  <h2 id="overlay-title">小蛇准备好啦</h2>
+                  <p id="overlay-copy">吃掉红果子，看看能长到多长。</p>
+                  <button class="primary-button" id="play-button">
+                    <svg viewBox="0 0 20 20" aria-hidden="true">
+                      <path d="m7 4 9 6-9 6Z" fill="currentColor" /></svg
+                    ><span id="play-label">开始游戏</span>
+                  </button>
+                  <span class="overlay-hint" id="overlay-hint"
+                    >也可以按方向键开始</span
+                  >
+                </div>
+              </div>
+              <span class="board-corner" aria-hidden="true">LET'S GROW!</span>
+            </div>
+            <div class="board-footer">
+              <span><span class="food-dot"></span>每颗果子 +10 分</span
+              ><button class="text-button" id="pause-button" disabled>
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                  <path
+                    d="M5 3v10M11 3v10"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  /></svg
+                ><span id="pause-label">暂停</span><kbd>空格</kbd>
+              </button>
+            </div>
+            <div class="touch-controls" aria-label="触控方向键">
+              <span>在棋盘上滑动<br />或轻触方向按钮</span>
+              <div class="dpad">
+                <button data-direction="up" aria-label="向上">↑</button
+                ><button data-direction="left" aria-label="向左">←</button
+                ><button data-direction="down" aria-label="向下">↓</button
+                ><button data-direction="right" aria-label="向右">→</button>
+              </div>
+            </div>
+          </section>
+
+          <aside class="sidebar" aria-label="游戏设置与操作">
+            <section class="score-card current-score">
+              <div class="score-label">
+                本局得分
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M12 7c-8-4-12 7-6 12 2 2 4 1 6 1s4 1 6-1c6-5 2-16-6-12Z"
+                    fill="currentColor"
+                  />
+                  <path
+                    d="M12 7c0-5 4-5 5-5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  />
+                </svg>
+              </div>
+              <div class="score-number" id="score">00</div>
+              <div class="score-caption" id="score-caption">
+                每一口，都是新进步。
+              </div>
+            </section>
+            <section class="best-score">
+              <div>
+                <span class="best-label"
+                  ><svg viewBox="0 0 20 20" aria-hidden="true">
+                    <path
+                      d="M6 3h8v5c0 6-8 6-8 0ZM6 5H3v2c0 3 3 3 4 3m7-5h3v2c0 3-3 3-4 3M10 12v4m-4 1h8"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                    /></svg
+                  >我的最高分</span
+                ><span class="best-caption" id="best-caption"
+                  >下一口，超越自己</span
+                >
+              </div>
+              <strong id="best-score">00</strong>
+            </section>
+
+            <section class="settings-section">
+              <div class="section-heading">
+                <h2>找到你的节奏</h2>
+                <span id="speed-label">刚刚好</span>
+              </div>
+              <fieldset class="difficulty-options">
+                <legend class="sr-only">游戏速度（开始前可选择）</legend>
+                <label
+                  ><input type="radio" name="difficulty" value="relaxed" /><span
+                    >悠闲</span
+                  ></label
+                ><label
+                  ><input
+                    type="radio"
+                    name="difficulty"
+                    value="normal"
+                    checked
+                  /><span>标准</span></label
+                ><label
+                  ><input type="radio" name="difficulty" value="fast" /><span
+                    >挑战</span
+                  ></label
+                >
+              </fieldset>
+              <p class="setting-note" id="difficulty-note">
+                不慌不忙，也要眼疾手快。
+              </p>
+            </section>
+
+            <section class="controls-section">
+              <div class="section-heading">
+                <h2>上手只要一秒</h2>
+                <span>HOW TO PLAY</span>
+              </div>
+              <div class="control-row">
+                <div class="key-cluster" aria-hidden="true">
+                  <kbd>↑</kbd>
+                  <div><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd></div>
+                </div>
+                <div>
+                  <strong>控制方向</strong>
+                  <p>方向键 / W A S D</p>
+                </div>
+              </div>
+              <div class="control-row pause-instruction">
+                <kbd class="space-key">space</kbd>
+                <div>
+                  <strong>歇一小会</strong>
+                  <p>空格暂停，再按继续</p>
+                </div>
+              </div>
+              <p class="rule-note">记得转弯，别碰到墙和自己哦。</p>
+            </section>
+
+            <button class="restart-button" id="restart-button">
+              <svg viewBox="0 0 20 20" aria-hidden="true">
+                <path
+                  d="M4 8a6 6 0 1 1 0 5M4 3v5h5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                /></svg
+              >重新开始<span>↗</span>
+            </button>
+          </aside>
+        </div>
+        <p
+          id="announcement"
+          class="sr-only"
+          role="status"
+          aria-live="polite"
+        ></p>
+      </main>
+      <footer class="site-footer">
+        <span>没有终点，只有下一口。</span
+        ><span
+          >A LITTLE PLAY, A BETTER DAY
+          <span class="footer-spark">✳</span></span
+        >
+      </footer>
+    </div>
+  </body>
+</html>
