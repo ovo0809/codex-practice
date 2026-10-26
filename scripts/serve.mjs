@@ -9,6 +9,7 @@ const routes = new Map([
   ["/index.html", ["index.html", "text/html; charset=utf-8"]],
   ["/styles.css", ["styles.css", "text/css; charset=utf-8"]],
   ["/game-core.js", ["game-core.js", "text/javascript; charset=utf-8"]],
+  ["/renderer.js", ["renderer.js", "text/javascript; charset=utf-8"]],
   ["/game.js", ["game.js", "text/javascript; charset=utf-8"]],
 ]);
 const port = Number(process.env.PORT || 3000);

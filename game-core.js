@@ -7,7 +7,8 @@
     left: { x: -1, y: 0 },
     right: { x: 1, y: 0 },
   });
-  const SPEEDS = Object.freeze({ relaxed: 185, normal: 135, fast: 90 });
+  // First-person play needs time to read the arena at eye level.
+  const SPEEDS = Object.freeze({ relaxed: 320, normal: 240, fast: 170 });
   const sameCell = (a, b) => a.x === b.x && a.y === b.y;
 
   function placeFood(snake, size, random = Math.random) {
@@ -97,12 +98,20 @@
 
   function interval(state) {
     return Math.max(
-      65,
+      120,
       SPEEDS[state.difficulty] - Math.floor(state.score / 50) * 5,
     );
   }
 
-  const api = { createGame, turn, step, interval, placeFood, DIRECTIONS };
+  function turnRelative(state, side) {
+    if (side !== "left" && side !== "right") return state;
+    const headings = ["up", "right", "down", "left"];
+    const heading = state.turns.at(-1) || state.direction;
+    const offset = side === "left" ? 3 : 1;
+    return turn(state, headings[(headings.indexOf(heading) + offset) % 4]);
+  }
+
+  const api = { createGame, turn, turnRelative, step, interval, placeFood, DIRECTIONS };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.SnakeCore = api;
 })(globalThis);

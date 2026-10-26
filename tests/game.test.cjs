@@ -3,6 +3,7 @@ const assert = require("node:assert/strict");
 const {
   createGame,
   turn,
+  turnRelative,
   step,
   placeFood,
   interval,
@@ -100,5 +101,34 @@ test("filling the board wins and does not loop while placing food", () => {
 test("speed modes differ and progression has a safe lower bound", () => {
   assert.ok(interval(createGame("relaxed")) > interval(createGame("normal")));
   assert.ok(interval(createGame("normal")) > interval(createGame("fast")));
-  assert.equal(interval({ ...createGame("fast"), score: 99999 }), 65);
+  assert.equal(interval({ ...createGame("fast"), score: 99999 }), 120);
+});
+
+test("relative turns follow the snake heading in all four directions", () => {
+  const headings = ["up", "right", "down", "left"];
+  for (let i = 0; i < headings.length; i++) {
+    const state = { ...running(), direction: headings[i] };
+    assert.deepEqual(turnRelative(state, "left").turns, [headings[(i + 3) % 4]]);
+    assert.deepEqual(turnRelative(state, "right").turns, [headings[(i + 1) % 4]]);
+  }
+});
+
+test("quick relative turns use queued heading and remain bounded", () => {
+  const state = running();
+  const queued = turnRelative(turnRelative(state, "left"), "left");
+  assert.deepEqual(queued.turns, ["up", "left"]);
+  assert.equal(turnRelative(queued, "right"), queued);
+  const first = step(queued);
+  assert.deepEqual(first.snake[0], { x: 11, y: 8 });
+  assert.deepEqual(step(first).snake[0], { x: 10, y: 8 });
+  assert.equal(state.turns.length, 0);
+});
+
+test("relative controls ignore invalid input and inactive games", () => {
+  const state = running();
+  assert.equal(turnRelative(state, "up"), state);
+  for (const phase of ["paused", "over", "won"]) {
+    const inactive = { ...state, phase };
+    assert.equal(turnRelative(inactive, "left"), inactive);
+  }
 });
