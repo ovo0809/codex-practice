@@ -3,257 +3,128 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#f5f5ef" />
-    <meta
-      name="description"
-      content="再吃一口。一个轻松、免费的贪吃蛇小游戏，支持键盘和手机触控。"
-    />
-    <title>小蛇俱乐部 · 再吃一口</title>
-    <link
-      rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23243e2d'/%3E%3Cpath d='M18 43h21V32H24V21h22' fill='none' stroke='%23c2e77a' stroke-width='10' stroke-linejoin='round'/%3E%3C/svg%3E"
-    />
+    <meta name="theme-color" content="#173c2d" />
+    <meta name="description" content="小蛇俱乐部：一款无需安装、支持键盘与触控的 3D 第一人称贪吃蛇小游戏。" />
+    <title>小蛇俱乐部 · 草地探险</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%231b4433'/%3E%3Cpath d='M17 44h22V33H25V21h23' fill='none' stroke='%23d2e79b' stroke-width='10' stroke-linejoin='round'/%3E%3Ccircle cx='46' cy='19' r='2' fill='%231b4433'/%3E%3C/svg%3E" />
     <link rel="stylesheet" href="styles.css" />
     <script src="game-core.js" defer></script>
+    <script src="renderer.js" defer></script>
     <script src="game.js" defer></script>
   </head>
   <body>
-    <div class="site-shell">
-      <header class="site-header">
+    <div class="page-shell">
+      <header class="topbar">
         <a class="brand" href="./" aria-label="小蛇俱乐部首页">
-          <svg class="brand-icon" viewBox="0 0 40 40" aria-hidden="true">
-            <rect width="40" height="40" rx="12" fill="currentColor" />
-            <path
-              d="M11 28h15v-8H15v-8h14"
-              fill="none"
-              stroke="#c4e58c"
-              stroke-width="6"
-              stroke-linejoin="round"
-            />
-            <circle cx="28" cy="10.5" r="1" fill="#243e2d" />
+          <svg class="brand-mark" viewBox="0 0 44 44" aria-hidden="true">
+            <rect width="44" height="44" rx="14" fill="currentColor" />
+            <path d="M11 31h18V22H16V12h18" fill="none" stroke="#d4eaa0" stroke-width="6" stroke-linejoin="round" />
+            <circle cx="32" cy="10" r="1.25" fill="#173c2d" />
           </svg>
-          <span
-            >小蛇俱乐部<span class="brand-subtitle"
-              >THE LITTLE SNAKE CLUB</span
-            ></span
-          >
+          <span><strong>小蛇俱乐部</strong><small>THE LITTLE SNAKE CLUB</small></span>
         </a>
-        <span class="header-note"
-          ><span class="status-dot"></span>给大脑放个小假</span
-        >
+        <div class="session-status" aria-live="polite">
+          <span class="status-light" id="game-status-dot"></span>
+          <span id="game-status">等待出发</span>
+        </div>
+        <div class="score-strip" aria-label="分数">
+          <div><span>本局</span><strong id="score">00</strong></div>
+          <span class="score-rule" aria-hidden="true"></span>
+          <div><span>最佳</span><strong id="best-score">00</strong></div>
+        </div>
       </header>
 
       <main>
-        <section class="intro" aria-labelledby="page-title">
-          <div>
-            <p class="eyebrow">JUST ONE MORE BITE</p>
-            <h1 id="page-title">
-              再吃一口<span class="title-period">。</span>
-            </h1>
-            <p class="intro-copy">一小格，一小格，把快乐吃长。</p>
+        <section class="game-heading" aria-labelledby="page-title">
+          <div><p class="eyebrow">FIRST-PERSON GARDEN RUN</p><h1 id="page-title">草地探险</h1></div>
+          <p>沿着果香向前。每一次转弯，都把小路走得更长。</p>
+        </section>
+
+        <section class="game-card" aria-label="3D 第一人称贪吃蛇游戏">
+          <div class="viewport" id="board-wrap">
+            <canvas id="game-board" width="1280" height="720" tabindex="0" aria-label="3D 第一人称贪吃蛇场景。按左方向键或 A 向左转，按右方向键或 D 向右转，空格暂停。">你的浏览器需要支持 Canvas 与 WebGL 才能显示 3D 游戏。</canvas>
+            <div class="viewport-shade" aria-hidden="true"></div>
+            <div class="hud-top" aria-label="旅途信息">
+              <div class="hud-chip"><span>朝向</span><strong id="direction-label">东</strong></div>
+              <div class="reticle" aria-hidden="true"><i></i><i></i></div>
+              <div class="hud-chip hud-chip-right"><span>果子距离</span><strong id="food-distance">— 格</strong></div>
+            </div>
+            <div class="speed-chip"><span class="speed-pulse" aria-hidden="true"></span><span>当前节奏</span><strong id="speed-label">标准</strong></div>
+            <figure class="minimap-panel" aria-label="俯视小地图，北方朝上">
+              <figcaption><span>路线图</span><small>N ↑</small></figcaption>
+              <canvas id="minimap" width="160" height="160" aria-hidden="true"></canvas>
+            </figure>
+
+            <div class="game-overlay" id="game-overlay">
+              <div class="overlay-card">
+                <span class="overlay-eyebrow" id="overlay-eyebrow">新的草地正在醒来</span>
+                <h2 id="overlay-title">从小蛇的眼睛出发</h2>
+                <p id="overlay-copy">自动向前，左右转向。沿着小地图找到红果子吧。</p>
+                <button class="primary-button" id="play-button" type="button">
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 9 6-9 6Z" fill="currentColor" /></svg>
+                  <span id="play-label">开始探险</span>
+                </button>
+                <span class="overlay-hint" id="overlay-hint">也可以按 Enter 键出发</span>
+              </div>
+            </div>
+            <div class="render-error" id="render-error" role="alert" hidden>
+              <strong>暂时无法打开 3D 草地</strong>
+              <span>请在支持 WebGL 的现代浏览器中重新打开游戏。</span>
+            </div>
           </div>
-          <div class="intro-stamp" aria-hidden="true">
-            <span>吃 饱 了</span
-            ><svg viewBox="0 0 64 40">
-              <path
-                d="M6 30h32V10h20"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="11"
-                stroke-linejoin="round"
-              />
-              <circle cx="54" cy="7" r="2" fill="#f5f5ef" />
-              <circle cx="54" cy="13" r="2" fill="#f5f5ef" /></svg
-            ><span>才 有 力 气</span>
+
+          <div class="game-console">
+            <div class="turn-controls" aria-label="转向控制">
+              <button class="turn-button" type="button" data-turn="left" aria-label="向左转">
+                <span class="turn-arrow">↰</span><span><strong>向左转</strong><small>← 或 A</small></span>
+              </button>
+              <button class="turn-button" type="button" data-turn="right" aria-label="向右转">
+                <span><strong>向右转</strong><small>→ 或 D</small></span><span class="turn-arrow">↱</span>
+              </button>
+            </div>
+            <div class="action-controls">
+              <button class="console-button" id="fullscreen-button" type="button" aria-pressed="false">
+                <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3.5 7V3.5H7M11 3.5h3.5V7M14.5 11v3.5H11M7 14.5H3.5V11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                全屏
+              </button>
+              <button class="console-button" id="pause-button" type="button" disabled>
+                <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M6 4v10M12 4v10" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" /></svg>
+                <span id="pause-label">暂停</span><kbd>空格</kbd>
+              </button>
+              <button class="console-button" id="restart-button" type="button">
+                <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M4 8a5.5 5.5 0 1 1 1.2 4.5M4 3.5V8h4.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                重新开始
+              </button>
+            </div>
           </div>
         </section>
 
-        <div class="game-layout">
-          <section class="board-card" aria-label="贪吃蛇游戏">
-            <div class="board-toolbar">
-              <div class="board-label">
-                <span class="status-dot" id="game-status-dot"></span
-                ><span id="game-status">准备就绪</span>
-              </div>
-              <span class="board-size">24 × 24 · 经典棋盘</span
-              ><span class="mobile-score"
-                >得分 <strong id="mobile-score">00</strong></span
-              >
-            </div>
-            <div class="board-wrap" id="board-wrap">
-              <canvas
-                id="game-board"
-                width="600"
-                height="600"
-                tabindex="0"
-                aria-label="贪吃蛇棋盘。使用方向键或 W A S D 移动，空格暂停。"
-                >你的浏览器需要支持 Canvas 才能玩这个游戏。</canvas
-              >
-              <div class="game-overlay" id="game-overlay">
-                <div class="overlay-card">
-                  <span class="overlay-eyebrow" id="overlay-eyebrow"
-                    >今日份的小快乐</span
-                  >
-                  <h2 id="overlay-title">小蛇准备好啦</h2>
-                  <p id="overlay-copy">吃掉红果子，看看能长到多长。</p>
-                  <button class="primary-button" id="play-button">
-                    <svg viewBox="0 0 20 20" aria-hidden="true">
-                      <path d="m7 4 9 6-9 6Z" fill="currentColor" /></svg
-                    ><span id="play-label">开始游戏</span>
-                  </button>
-                  <span class="overlay-hint" id="overlay-hint"
-                    >也可以按方向键开始</span
-                  >
-                </div>
-              </div>
-              <span class="board-corner" aria-hidden="true">LET'S GROW!</span>
-            </div>
-            <div class="board-footer">
-              <span><span class="food-dot"></span>每颗果子 +10 分</span
-              ><button class="text-button" id="pause-button" disabled>
-                <svg viewBox="0 0 16 16" aria-hidden="true">
-                  <path
-                    d="M5 3v10M11 3v10"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                  /></svg
-                ><span id="pause-label">暂停</span><kbd>空格</kbd>
-              </button>
-            </div>
-            <div class="touch-controls" aria-label="触控方向键">
-              <span>在棋盘上滑动<br />或轻触方向按钮</span>
-              <div class="dpad">
-                <button data-direction="up" aria-label="向上">↑</button
-                ><button data-direction="left" aria-label="向左">←</button
-                ><button data-direction="down" aria-label="向下">↓</button
-                ><button data-direction="right" aria-label="向右">→</button>
-              </div>
-            </div>
-          </section>
+        <section class="settings-bar" aria-label="游戏设置和提示">
+          <div class="setting-group">
+            <div class="setting-heading"><span>探险节奏</span><small id="difficulty-note">标准速度，适合熟悉第一人称转向。</small></div>
+            <fieldset class="difficulty-options">
+              <legend class="sr-only">选择游戏速度</legend>
+              <label><input type="radio" name="difficulty" value="relaxed" /><span>悠闲</span></label>
+              <label><input type="radio" name="difficulty" value="normal" checked /><span>标准</span></label>
+              <label><input type="radio" name="difficulty" value="fast" /><span>挑战</span></label>
+            </fieldset>
+          </div>
+          <div class="tip-card">
+            <span class="tip-icon" aria-hidden="true">✦</span>
+            <p><strong>小提示</strong>小蛇会自动前进。看准围墙与小地图，只需决定何时向左或向右。</p>
+          </div>
+          <label class="motion-toggle">
+            <input type="checkbox" id="reduce-motion" />
+            <span aria-hidden="true"></span>
+            <span><strong>柔和镜头</strong><small>按格对齐镜头，停止果子浮动</small></span>
+          </label>
+        </section>
 
-          <aside class="sidebar" aria-label="游戏设置与操作">
-            <section class="score-card current-score">
-              <div class="score-label">
-                本局得分
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    d="M12 7c-8-4-12 7-6 12 2 2 4 1 6 1s4 1 6-1c6-5 2-16-6-12Z"
-                    fill="currentColor"
-                  />
-                  <path
-                    d="M12 7c0-5 4-5 5-5"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  />
-                </svg>
-              </div>
-              <div class="score-number" id="score">00</div>
-              <div class="score-caption" id="score-caption">
-                每一口，都是新进步。
-              </div>
-            </section>
-            <section class="best-score">
-              <div>
-                <span class="best-label"
-                  ><svg viewBox="0 0 20 20" aria-hidden="true">
-                    <path
-                      d="M6 3h8v5c0 6-8 6-8 0ZM6 5H3v2c0 3 3 3 4 3m7-5h3v2c0 3-3 3-4 3M10 12v4m-4 1h8"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                    /></svg
-                  >我的最高分</span
-                ><span class="best-caption" id="best-caption"
-                  >下一口，超越自己</span
-                >
-              </div>
-              <strong id="best-score">00</strong>
-            </section>
-
-            <section class="settings-section">
-              <div class="section-heading">
-                <h2>找到你的节奏</h2>
-                <span id="speed-label">刚刚好</span>
-              </div>
-              <fieldset class="difficulty-options">
-                <legend class="sr-only">游戏速度（开始前可选择）</legend>
-                <label
-                  ><input type="radio" name="difficulty" value="relaxed" /><span
-                    >悠闲</span
-                  ></label
-                ><label
-                  ><input
-                    type="radio"
-                    name="difficulty"
-                    value="normal"
-                    checked
-                  /><span>标准</span></label
-                ><label
-                  ><input type="radio" name="difficulty" value="fast" /><span
-                    >挑战</span
-                  ></label
-                >
-              </fieldset>
-              <p class="setting-note" id="difficulty-note">
-                不慌不忙，也要眼疾手快。
-              </p>
-            </section>
-
-            <section class="controls-section">
-              <div class="section-heading">
-                <h2>上手只要一秒</h2>
-                <span>HOW TO PLAY</span>
-              </div>
-              <div class="control-row">
-                <div class="key-cluster" aria-hidden="true">
-                  <kbd>↑</kbd>
-                  <div><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd></div>
-                </div>
-                <div>
-                  <strong>控制方向</strong>
-                  <p>方向键 / W A S D</p>
-                </div>
-              </div>
-              <div class="control-row pause-instruction">
-                <kbd class="space-key">space</kbd>
-                <div>
-                  <strong>歇一小会</strong>
-                  <p>空格暂停，再按继续</p>
-                </div>
-              </div>
-              <p class="rule-note">记得转弯，别碰到墙和自己哦。</p>
-            </section>
-
-            <button class="restart-button" id="restart-button">
-              <svg viewBox="0 0 20 20" aria-hidden="true">
-                <path
-                  d="M4 8a6 6 0 1 1 0 5M4 3v5h5"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                /></svg
-              >重新开始<span>↗</span>
-            </button>
-          </aside>
-        </div>
-        <p
-          id="announcement"
-          class="sr-only"
-          role="status"
-          aria-live="polite"
-        ></p>
+        <p id="score-caption" class="sr-only">每颗果子增加 10 分。</p>
+        <p id="best-caption" class="sr-only">最高分保存在当前浏览器中。</p>
+        <p id="announcement" class="sr-only" role="status" aria-live="polite"></p>
       </main>
-      <footer class="site-footer">
-        <span>没有终点，只有下一口。</span
-        ><span
-          >A LITTLE PLAY, A BETTER DAY
-          <span class="footer-spark">✳</span></span
-        >
-      </footer>
+      <footer class="site-footer"><span>走进草地，再吃一口。</span><span>24 × 24 GARDEN · WEBGL</span></footer>
     </div>
   </body>
 </html>
